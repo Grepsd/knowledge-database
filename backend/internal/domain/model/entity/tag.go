@@ -13,20 +13,47 @@ var NameIsTooLong = fmt.Errorf("name is too long, max : %d", NameMaxLength)
 var NameIsTooShort = fmt.Errorf("name is too short, min : %d", NameMinLength)
 
 type Tag struct {
-	ID   uuid.UUID
-	Name string
+	id   *TagID
+	name *TagName
+}
+type TagID struct {
+	value uuid.UUID
 }
 
-func NewTag(ID uuid.UUID, name string) (*Tag, error) {
-	if len(name) > NameMaxLength {
-		return nil, errors.Wrap(NameIsTooLong, fmt.Sprintf("length : %d", len(name)))
-	}
-	if len(name) < NameMinLength {
-		return nil, errors.Wrap(NameIsTooShort, fmt.Sprintf("length : %d", len(name)))
-	}
- 	return &Tag{ID: ID, Name: name}, nil
+func (i *TagID) String() string {
+	return i.value.String()
 }
 
-func CreateTag(name string) (*Tag, error) {
-	return NewTag(uuid.NewV4(), name)
+type TagName struct {
+	value string
+}
+
+func (t *Tag) ID() *TagID {
+	return t.id
+}
+
+func (t *Tag) Name() *TagName {
+	return t.name
+}
+
+func (t *TagName) Len() int {
+	return len(t.value)
+}
+
+func NewTagID(value uuid.UUID) *TagID {
+	return &TagID{value: value}
+}
+
+func NewTagName(value string) *TagName {
+	return &TagName{value: value}
+}
+
+func NewTag(id *TagID, name *TagName) (*Tag, error) {
+	if name.Len() > NameMaxLength {
+		return nil, errors.Wrap(NameIsTooLong, fmt.Sprintf("length : %d", name.Len()))
+	}
+	if name.Len() < NameMinLength {
+		return nil, errors.Wrap(NameIsTooShort, fmt.Sprintf("length : %d", name.Len()))
+	}
+	return &Tag{id, name}, nil
 }

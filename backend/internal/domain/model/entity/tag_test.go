@@ -34,7 +34,7 @@ func TestCreateTag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := CreateTag(tt.args.name)
+			_, err := NewTag(NewTagID(uuid.NewV4()), NewTagName(tt.args.name))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CreateTag() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -58,7 +58,7 @@ func TestNewTag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewTag(tt.args.ID, tt.args.name)
+			got, err := NewTag(NewTagID(tt.args.ID), NewTagName(tt.args.name))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewTag() error = %v, wantErr %v", err, tt.wantErr)
 				return
