@@ -261,7 +261,6 @@ func TestArticle_HasBeenRead(t *testing.T) {
 
 func TestArticle_Read(t *testing.T) {
 	readDateTime := NewArticleReadDateTime()
-	readDateTime.Update(time.Now())
 	testArticle, err := NewArticle(
 		NewArticleID(uuid.NewV4()),
 		NewArticleTitle("valid"),
@@ -274,8 +273,8 @@ func TestArticle_Read(t *testing.T) {
 		t.Error("cannot create test article")
 	}
 	t.Run("ok", func(t *testing.T) {
-		if err := testArticle.Read(time.Now()); err == nil {
-			t.Error("did expected error, got none")
+		if err := testArticle.Read(time.Now()); err != nil {
+			t.Errorf("did not expected error, got %s", err.Error())
 		}
 	})
 	t.Run("already read", func(t *testing.T) {
@@ -393,4 +392,39 @@ func TestArticle_Tags(t *testing.T) {
 	if returned := testArticle.Tags(); reflect.DeepEqual(returned, &expected) {
 		t.Error("result gotten differs from expected result")
 	}
+}
+
+func TestArticle_Strings(t *testing.T) {
+	id := NewArticleID(uuid.NewV4())
+	title := NewArticleTitle("valid")
+	url := NewArticleURL("http://go.com")
+	readDateTime := NewArticleReadDateTime()
+	readDateTime.Update(time.Now())
+	savedDateTime := NewArticleSavedDateTime()
+	savedDateTime.Update(time.Now())
+	t.Run("valid id.String", func(t *testing.T) {
+		if id.String() != id.value.String() {
+			t.Errorf("expected %s got %s", id.String(), id.value.String())
+		}
+	})
+	t.Run("valid title.String", func(t *testing.T) {
+		if title.String() != title.value {
+			t.Errorf("expected %s got %s", title.String(), title.value)
+		}
+	})
+	t.Run("valid url.String", func(t *testing.T) {
+		if url.String() != url.value {
+			t.Errorf("expected %s got %s", url.String(), url.value)
+		}
+	})
+	t.Run("valid readDateTime.String", func(t *testing.T) {
+		if readDateTime.String() != readDateTime.value.String() {
+			t.Errorf("expected %s got %s", readDateTime.String(), readDateTime.value.String())
+		}
+	})
+	t.Run("valid savedDateTime.String", func(t *testing.T) {
+		if savedDateTime.String() != savedDateTime.value.String() {
+			t.Errorf("expected %s got %s", savedDateTime.String(), savedDateTime.value.String())
+		}
+	})
 }

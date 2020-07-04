@@ -69,3 +69,31 @@ func TestNewTag(t *testing.T) {
 		})
 	}
 }
+
+func TestTag_Name(t *testing.T) {
+	tagName := NewTagName("valid I")
+	tag, err := NewTag(NewTagID(uuid.NewV4()), tagName)
+	if err != nil {
+		t.Error("could not create new tag")
+	}
+	t.Run("valid", func(t *testing.T) {
+		if tag.Name() != tagName {
+			t.Errorf("expected %s got %s", tagName.String(), tag.Name().String())
+		}
+	})
+}
+
+func TestTag_Strings(t *testing.T) {
+	name := NewTagName("valid I")
+	id := NewTagID(uuid.NewV4())
+	t.Run("valid name.String", func(t *testing.T) {
+		if name.String() != name.value {
+			t.Errorf("expected %s got %s", name.String(), name.value)
+		}
+	})
+	t.Run("valid id.String", func(t *testing.T) {
+		if id.String() != id.value.String() {
+			t.Errorf("expected %s got %s", id.String(), id.value.String())
+		}
+	})
+}

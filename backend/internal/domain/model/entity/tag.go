@@ -40,6 +40,10 @@ func (t *TagName) Len() int {
 	return len(t.value)
 }
 
+func (t *TagName) String() string {
+	return t.value
+}
+
 func NewTagID(value uuid.UUID) *TagID {
 	return &TagID{value: value}
 }

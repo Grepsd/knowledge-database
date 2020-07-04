@@ -44,6 +44,10 @@ type ArticleURL struct {
 	value string
 }
 
+func (u ArticleURL) String() string {
+	return u.value
+}
+
 func NewArticleURL(value string) *ArticleURL {
 	return &ArticleURL{value: value}
 }
@@ -103,6 +107,10 @@ func (at *ArticleTitle) Len() int {
 	return len(at.value)
 }
 
+func (at *ArticleTitle) String() string {
+	return at.value
+}
+
 func NewArticleID(id uuid.UUID) *ArticleID {
 	return &ArticleID{id}
 }
@@ -158,7 +166,6 @@ func (a *Article) RemoveTag(toRemove *Tag) error {
 	for index, tag := range a.tags {
 		if tag.ID() == toRemove.ID() {
 			a.tags[index] = a.tags[len(a.tags)-1]
-			//a.tags[len(a.tags)-1] = &Tag{}
 			a.tags = a.tags[:len(a.tags)-1]
 			return nil
 		}
