@@ -2,9 +2,9 @@ package repository
 
 import "github.com/grepsd/knowledge-database/internal/domain/model/entity"
 
-type ArticleRepository interface {
+type Tag interface {
 	GetAll() ([]entity.Article, error)
-	GetAllNotRead() ([]entity.Article, error)
-	GetAllByTags([]entity.Tag) ([]entity.Article, error)
-	GetOneById() ([]entity.Article, error)
+	GetOneById(id entity.TagID) (entity.Tag, error)
+	Save(tag entity.Tag) error
+	DeleteById(id entity.TagID)
 }
