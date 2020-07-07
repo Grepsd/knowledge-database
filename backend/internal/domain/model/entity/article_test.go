@@ -235,7 +235,6 @@ func TestArticle_HasBeenRead(t *testing.T) {
 		t.Error("cannot create test article")
 	}
 	readDateTime := NewArticleReadDateTime()
-	readDateTime.Update(time.Now())
 	testArticleAlreadyRead, err := NewArticle(
 		NewArticleID(uuid.NewV4()),
 		NewArticleTitle("valid"),
@@ -246,6 +245,10 @@ func TestArticle_HasBeenRead(t *testing.T) {
 	)
 	if err != nil {
 		t.Error("cannot create test article")
+	}
+	_, err = testArticleAlreadyRead.UpdateReadDateTime(time.Now())
+	if err != nil {
+		t.Error("failed to update read date time")
 	}
 	t.Run("not already read", func(t *testing.T) {
 		if testArticleNotAlreadyRead.HasBeenRead() {
@@ -297,8 +300,9 @@ func TestArticle_Id(t *testing.T) {
 	if err != nil {
 		t.Error("cannot create test article")
 	}
-	if testArticle.Id() != articleId {
-		t.Errorf("expected %s got %s", articleId.String(), testArticle.Id().String())
+	testArticleId := testArticle.Id()
+	if testArticleId != articleId {
+		t.Errorf("expected %s got %s", articleId.String(), testArticleId.String())
 	}
 }
 

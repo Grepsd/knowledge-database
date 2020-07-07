@@ -17,11 +17,11 @@ var ArticleDoesNotHaveTag = errors.New("does not have this tag")
 var ArticleHasAlreadyBeenRead = errors.New("article has already been read")
 
 type Article struct {
-	id            *ArticleID
-	title         *ArticleTitle
-	url           *ArticleURL
-	readDateTime  *ArticleReadDateTime
-	savedDateTime *ArticleSavedDateTime
+	id            ArticleID
+	title         ArticleTitle
+	url           ArticleURL
+	readDateTime  ArticleReadDateTime
+	savedDateTime ArticleSavedDateTime
 	tags          []*Tag
 }
 type ArticleID struct {
@@ -36,8 +36,8 @@ type ArticleTitle struct {
 	value string
 }
 
-func NewArticleTitle(value string) *ArticleTitle {
-	return &ArticleTitle{value: value}
+func NewArticleTitle(value string) ArticleTitle {
+	return ArticleTitle{value: value}
 }
 
 type ArticleURL struct {
@@ -48,8 +48,8 @@ func (u ArticleURL) String() string {
 	return u.value
 }
 
-func NewArticleURL(value string) *ArticleURL {
-	return &ArticleURL{value: value}
+func NewArticleURL(value string) ArticleURL {
+	return ArticleURL{value: value}
 }
 
 type ArticleReadDateTime struct {
@@ -71,31 +71,32 @@ func (t ArticleReadDateTime) IsZero() bool {
 	return t.value.IsZero()
 }
 
-func (t *ArticleReadDateTime) Update(value time.Time) {
+func (t ArticleReadDateTime) Update(value time.Time) (ArticleReadDateTime, error) {
 	t.value = value
+	return t, nil
 }
 
 func (t *ArticleReadDateTime) String() string {
 	return t.value.String()
 }
 
-func (a *Article) Id() *ArticleID {
+func (a *Article) Id() ArticleID {
 	return a.id
 }
 
-func (a *Article) Title() *ArticleTitle {
+func (a *Article) Title() ArticleTitle {
 	return a.title
 }
 
-func (a *Article) Url() *ArticleURL {
+func (a *Article) Url() ArticleURL {
 	return a.url
 }
 
-func (a *Article) ReadDateTime() *ArticleReadDateTime {
+func (a *Article) ReadDateTime() ArticleReadDateTime {
 	return a.readDateTime
 }
 
-func (a *Article) SavedDateTime() *ArticleSavedDateTime {
+func (a Article) SavedDateTime() ArticleSavedDateTime {
 	return a.savedDateTime
 }
 
@@ -111,11 +112,11 @@ func (at *ArticleTitle) String() string {
 	return at.value
 }
 
-func NewArticleID(id uuid.UUID) *ArticleID {
-	return &ArticleID{id}
+func NewArticleID(id uuid.UUID) ArticleID {
+	return ArticleID{id}
 }
 
-func NewArticle(ID *ArticleID, title *ArticleTitle, URL *ArticleURL, readDatetime *ArticleReadDateTime, savedDatetime *ArticleSavedDateTime, tags []*Tag) (*Article, error) {
+func NewArticle(ID ArticleID, title ArticleTitle, URL ArticleURL, readDatetime ArticleReadDateTime, savedDatetime ArticleSavedDateTime, tags []*Tag) (*Article, error) {
 	if _, err := url.ParseRequestURI(URL.value); err != nil {
 		return nil, errors.Wrap(err, InvalidArticleURL.Error())
 	}
@@ -125,16 +126,16 @@ func NewArticle(ID *ArticleID, title *ArticleTitle, URL *ArticleURL, readDatetim
 	return &Article{id: ID, title: title, url: URL, readDateTime: readDatetime, savedDateTime: savedDatetime, tags: tags}, nil
 }
 
-func CreateArticle(id *ArticleID, title *ArticleTitle, url *ArticleURL) (*Article, error) {
+func CreateArticle(id ArticleID, title ArticleTitle, url ArticleURL) (*Article, error) {
 	return NewArticle(id, title, url, NewArticleReadDateTime(), NewArticleSavedDateTime(), NewEmptyTags())
 }
 
-func NewArticleSavedDateTime() *ArticleSavedDateTime {
-	return &ArticleSavedDateTime{time.Time{}}
+func NewArticleSavedDateTime() ArticleSavedDateTime {
+	return ArticleSavedDateTime{time.Time{}}
 }
 
-func NewArticleReadDateTime() *ArticleReadDateTime {
-	return &ArticleReadDateTime{time.Time{}}
+func NewArticleReadDateTime() ArticleReadDateTime {
+	return ArticleReadDateTime{time.Time{}}
 }
 
 func NewEmptyTags() []*Tag {
@@ -181,10 +182,22 @@ func (a *Article) Read(time time.Time) error {
 	if !a.readDateTime.IsZero() {
 		return ArticleHasAlreadyBeenRead
 	}
-	a.ReadDateTime().Update(time)
+	_, err := a.UpdateReadDateTime(time)
+	if err != nil {
+		return errors.Wrap(err, "failed to read article")
+	}
 	return nil
 }
 
 func (a *Article) HasBeenRead() bool {
 	return !a.ReadDateTime().IsZero()
+}
+
+func (a *Article) UpdateReadDateTime(t time.Time) (ArticleReadDateTime, error) {
+	dt, err := NewArticleReadDateTime().Update(t)
+	if err != nil {
+		return ArticleReadDateTime{}, err
+	}
+	a.readDateTime = dt
+	return a.readDateTime, nil
 }
