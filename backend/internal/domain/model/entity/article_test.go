@@ -27,12 +27,6 @@ func TestCreateArticle(t *testing.T) {
 			true,
 		},
 		{
-			"invalid url",
-			args{
-				"valid title", "olo"},
-			true,
-		},
-		{
 			"no error",
 			args{
 				validTitle, "http://go.com/lol"},
@@ -41,7 +35,11 @@ func TestCreateArticle(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := CreateArticle(NewArticleID(uuid.NewV4()), NewArticleTitle(tt.args.title), NewArticleURL(tt.args.url))
+			tArticleURL, err := NewArticleURL(tt.args.url)
+			if err != nil {
+				t.Error("invalid URL")
+			}
+			_, err = CreateArticle(NewArticleID(uuid.NewV4()), NewArticleTitle(tt.args.title), tArticleURL)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CreateArticle() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -59,12 +57,16 @@ func TestNewEmptyTags(t *testing.T) {
 func TestArticle_HasTag(t *testing.T) {
 	testTag, err := NewTag(NewTagID(uuid.NewV4()), NewTagName("valie I"))
 	testTag2, err := NewTag(NewTagID(uuid.NewV4()), NewTagName("valid II"))
+	testArticleURL, err := NewArticleURL("http://go.com")
+	if err != nil {
+		t.Error("invalid URL")
+	}
 	testArticle, err := NewArticle(
 		NewArticleID(uuid.NewV4()),
 		NewArticleTitle("valid"),
-		NewArticleURL("http://go.com"),
-		NewArticleReadDateTime(),
-		NewArticleSavedDateTime(),
+		testArticleURL,
+		NewArticleReadDateTime(time.Time{}),
+		NewArticleSavedDateTime(time.Now()),
 		[]*Tag{testTag},
 	)
 	if err != nil {
@@ -83,7 +85,8 @@ func TestArticle_HasTag(t *testing.T) {
 }
 
 func TestArticle_AddTag(t *testing.T) {
-	testArticle, err := CreateArticle(NewArticleID(uuid.NewV4()), NewArticleTitle("valid"), NewArticleURL("http://go.com"))
+	testArticleURL, err := NewArticleURL("http://go.com")
+	testArticle, err := CreateArticle(NewArticleID(uuid.NewV4()), NewArticleTitle("valid"), testArticleURL)
 	if err != nil {
 		t.Error("cannot create test article")
 	}
@@ -117,7 +120,8 @@ func TestArticle_CountTags(t *testing.T) {
 	if err != nil {
 		t.Error("cannot create test tag")
 	}
-	testArticleWithoutTags, err := CreateArticle(NewArticleID(uuid.NewV4()), NewArticleTitle("valid title"), NewArticleURL("http://go.com/lol"))
+	testArticleURL, _ := NewArticleURL("http://go.com")
+	testArticleWithoutTags, err := CreateArticle(NewArticleID(uuid.NewV4()), NewArticleTitle("valid title"), testArticleURL)
 	if err != nil {
 		t.Error("cannot create test article")
 	}
@@ -126,9 +130,9 @@ func TestArticle_CountTags(t *testing.T) {
 	testArticleWithOneTag, err := NewArticle(
 		NewArticleID(uuid.NewV4()),
 		NewArticleTitle("valid"),
-		NewArticleURL("http://go.com"),
-		NewArticleReadDateTime(),
-		NewArticleSavedDateTime(),
+		testArticleURL,
+		NewArticleReadDateTime(time.Time{}),
+		NewArticleSavedDateTime(time.Now()),
 		[]*Tag{testTag},
 	)
 	if err != nil {
@@ -138,9 +142,9 @@ func TestArticle_CountTags(t *testing.T) {
 	testArticleWithTwoTags, err := NewArticle(
 		NewArticleID(uuid.NewV4()),
 		NewArticleTitle("valid"),
-		NewArticleURL("http://go.com"),
-		NewArticleReadDateTime(),
-		NewArticleSavedDateTime(),
+		testArticleURL,
+		NewArticleReadDateTime(time.Time{}),
+		NewArticleSavedDateTime(time.Now()),
 		testTags2,
 	)
 	if err != nil {
@@ -167,15 +171,16 @@ func TestArticle_RemoveTag(t *testing.T) {
 	testTag, err := NewTag(NewTagID(uuid.NewV4()), NewTagName("valid name I"))
 	testTag2, err := NewTag(NewTagID(uuid.NewV4()), NewTagName("valid name II"))
 	testTag3, err := NewTag(NewTagID(uuid.NewV4()), NewTagName("valid name III"))
+	testArticleURL, _ := NewArticleURL("http://go.com")
 
 	testTags1 := NewEmptyTags()
 	testTags1 = append(testTags1, testTag)
 	testArticle, err := NewArticle(
 		NewArticleID(uuid.NewV4()),
 		NewArticleTitle("valid"),
-		NewArticleURL("http://go.com"),
-		NewArticleReadDateTime(),
-		NewArticleSavedDateTime(),
+		testArticleURL,
+		NewArticleReadDateTime(time.Time{}),
+		NewArticleSavedDateTime(time.Now()),
 		testTags1,
 	)
 	if err != nil {
@@ -230,23 +235,24 @@ func TestArticle_RemoveTag(t *testing.T) {
 }
 
 func TestArticle_HasBeenRead(t *testing.T) {
-	testArticleNotAlreadyRead, err := CreateArticle(NewArticleID(uuid.NewV4()), NewArticleTitle("valid"), NewArticleURL("http://go.com"))
+	testArticleURL, _ := NewArticleURL("http://go.com")
+	testArticleNotAlreadyRead, err := CreateArticle(NewArticleID(uuid.NewV4()), NewArticleTitle("valid"), testArticleURL)
 	if err != nil {
 		t.Error("cannot create test article")
 	}
-	readDateTime := NewArticleReadDateTime()
+	readDateTime := NewArticleReadDateTime(time.Time{})
 	testArticleAlreadyRead, err := NewArticle(
 		NewArticleID(uuid.NewV4()),
 		NewArticleTitle("valid"),
-		NewArticleURL("http://go.com"),
+		testArticleURL,
 		readDateTime,
-		NewArticleSavedDateTime(),
+		NewArticleSavedDateTime(time.Now()),
 		NewEmptyTags(),
 	)
 	if err != nil {
 		t.Error("cannot create test article")
 	}
-	_, err = testArticleAlreadyRead.UpdateReadDateTime(time.Now())
+	_ = testArticleAlreadyRead.UpdateReadDateTime(time.Now())
 	if err != nil {
 		t.Error("failed to update read date time")
 	}
@@ -263,13 +269,14 @@ func TestArticle_HasBeenRead(t *testing.T) {
 }
 
 func TestArticle_Read(t *testing.T) {
-	readDateTime := NewArticleReadDateTime()
+	testArticleURL, _ := NewArticleURL("http://go.com")
+	readDateTime := NewArticleReadDateTime(time.Time{})
 	testArticle, err := NewArticle(
 		NewArticleID(uuid.NewV4()),
 		NewArticleTitle("valid"),
-		NewArticleURL("http://go.com"),
+		testArticleURL,
 		readDateTime,
-		NewArticleSavedDateTime(),
+		NewArticleSavedDateTime(time.Now()),
 		NewEmptyTags(),
 	)
 	if err != nil {
@@ -289,12 +296,13 @@ func TestArticle_Read(t *testing.T) {
 
 func TestArticle_Id(t *testing.T) {
 	articleId := NewArticleID(uuid.NewV4())
+	testArticleURL, _ := NewArticleURL("http://go.com")
 	testArticle, err := NewArticle(
 		articleId,
 		NewArticleTitle("valid"),
-		NewArticleURL("http://go.com"),
-		NewArticleReadDateTime(),
-		NewArticleSavedDateTime(),
+		testArticleURL,
+		NewArticleReadDateTime(time.Time{}),
+		NewArticleSavedDateTime(time.Now()),
 		NewEmptyTags(),
 	)
 	if err != nil {
@@ -307,14 +315,15 @@ func TestArticle_Id(t *testing.T) {
 }
 
 func TestArticle_ReadDateTime(t *testing.T) {
-	testTime := NewArticleReadDateTime()
+	testTime := NewArticleReadDateTime(time.Time{})
+	testArticleURL, _ := NewArticleURL("http://go.com")
 	testTime.Update(time.Now())
 	testArticle, err := NewArticle(
 		NewArticleID(uuid.NewV4()),
 		NewArticleTitle("valid"),
-		NewArticleURL("http://go.com"),
+		testArticleURL,
 		testTime,
-		NewArticleSavedDateTime(),
+		NewArticleSavedDateTime(time.Now()),
 		NewEmptyTags(),
 	)
 	if err != nil {
@@ -327,14 +336,14 @@ func TestArticle_ReadDateTime(t *testing.T) {
 }
 
 func TestArticle_SavedDateTime(t *testing.T) {
-	savedDateTime := NewArticleSavedDateTime()
-	savedDateTime.Update(time.Now())
-	readDateTime := NewArticleReadDateTime()
+	savedDateTime := NewArticleSavedDateTime(time.Now())
+	readDateTime := NewArticleReadDateTime(time.Time{})
+	testArticleURL, _ := NewArticleURL("http://go.com")
 	readDateTime.Update(time.Now())
 	testArticle, err := NewArticle(
 		NewArticleID(uuid.NewV4()),
 		NewArticleTitle("valid"),
-		NewArticleURL("http://go.com"),
+		testArticleURL,
 		readDateTime,
 		savedDateTime,
 		NewEmptyTags(),
@@ -350,7 +359,8 @@ func TestArticle_SavedDateTime(t *testing.T) {
 
 func TestArticle_Title(t *testing.T) {
 	expected := NewArticleTitle("valid title")
-	testArticle, err := CreateArticle(NewArticleID(uuid.NewV4()), expected, NewArticleURL("http://go.com"))
+	testArticleURL, _ := NewArticleURL("http://go.com")
+	testArticle, err := CreateArticle(NewArticleID(uuid.NewV4()), expected, testArticleURL)
 	if err != nil {
 		t.Error("cannot create test article")
 		return
@@ -361,7 +371,7 @@ func TestArticle_Title(t *testing.T) {
 }
 
 func TestArticle_Url(t *testing.T) {
-	expected := NewArticleURL("http://go.com")
+	expected, _ := NewArticleURL("http://go.com")
 	testArticle, err := CreateArticle(NewArticleID(uuid.NewV4()), NewArticleTitle("valid title"), expected)
 	if err != nil {
 		t.Error("cannot create test article")
@@ -376,15 +386,15 @@ func TestArticle_Tags(t *testing.T) {
 	tag1, _ := NewTag(NewTagID(uuid.NewV4()), NewTagName("tag I"))
 	tag2, _ := NewTag(NewTagID(uuid.NewV4()), NewTagName("tag II"))
 	tag3, _ := NewTag(NewTagID(uuid.NewV4()), NewTagName("tag III"))
-	savedDateTime := NewArticleSavedDateTime()
-	savedDateTime.Update(time.Now())
-	readDateTime := NewArticleReadDateTime()
+	testArticleURL, _ := NewArticleURL("http://go.com")
+	savedDateTime := NewArticleSavedDateTime(time.Now())
+	readDateTime := NewArticleReadDateTime(time.Time{})
 	readDateTime.Update(time.Now())
 	expected := []*Tag{tag1, tag2, tag3}
 	testArticle, err := NewArticle(
 		NewArticleID(uuid.NewV4()),
 		NewArticleTitle("valid"),
-		NewArticleURL("http://go.com"),
+		testArticleURL,
 		readDateTime,
 		savedDateTime,
 		expected,
@@ -401,11 +411,10 @@ func TestArticle_Tags(t *testing.T) {
 func TestArticle_Strings(t *testing.T) {
 	id := NewArticleID(uuid.NewV4())
 	title := NewArticleTitle("valid")
-	url := NewArticleURL("http://go.com")
-	readDateTime := NewArticleReadDateTime()
+	url, _ := NewArticleURL("http://go.com")
+	readDateTime := NewArticleReadDateTime(time.Time{})
 	readDateTime.Update(time.Now())
-	savedDateTime := NewArticleSavedDateTime()
-	savedDateTime.Update(time.Now())
+	savedDateTime := NewArticleSavedDateTime(time.Now())
 	t.Run("valid id.String", func(t *testing.T) {
 		if id.String() != id.value.String() {
 			t.Errorf("expected %s got %s", id.String(), id.value.String())
@@ -431,4 +440,43 @@ func TestArticle_Strings(t *testing.T) {
 			t.Errorf("expected %s got %s", savedDateTime.String(), savedDateTime.value.String())
 		}
 	})
+}
+
+func TestNewArticleURL(t *testing.T) {
+	type args struct {
+		value string
+	}
+	validURL, invalidURL := "http://go.com", "sdfjifjasdf"
+	tests := []struct {
+		name    string
+		url     string
+		want    ArticleURL
+		wantErr bool
+	}{
+		{
+			"valid",
+			validURL,
+			ArticleURL{"http://go.com"},
+			false,
+		},
+		{
+			"invalid",
+			invalidURL,
+			ArticleURL{},
+			true,
+		},
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := NewArticleURL(tt.url)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NewArticleURL() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewArticleURL() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

@@ -28,7 +28,7 @@ type ArticleID struct {
 	value uuid.UUID
 }
 
-func (i *ArticleID) String() string {
+func (i ArticleID) String() string {
 	return i.value.String()
 }
 
@@ -48,8 +48,12 @@ func (u ArticleURL) String() string {
 	return u.value
 }
 
-func NewArticleURL(value string) ArticleURL {
-	return ArticleURL{value: value}
+func NewArticleURL(value string) (ArticleURL, error) {
+	if _, err := url.ParseRequestURI(value); err != nil {
+		return ArticleURL{}, errors.Wrap(err, InvalidArticleURL.Error())
+	}
+
+	return ArticleURL{value: value}, nil
 }
 
 type ArticleReadDateTime struct {
@@ -59,11 +63,7 @@ type ArticleSavedDateTime struct {
 	value time.Time
 }
 
-func (t *ArticleSavedDateTime) Update(value time.Time) {
-	t.value = value
-}
-
-func (t *ArticleSavedDateTime) String() string {
+func (t ArticleSavedDateTime) String() string {
 	return t.value.String()
 }
 
@@ -108,7 +108,7 @@ func (at *ArticleTitle) Len() int {
 	return len(at.value)
 }
 
-func (at *ArticleTitle) String() string {
+func (at ArticleTitle) String() string {
 	return at.value
 }
 
@@ -117,25 +117,23 @@ func NewArticleID(id uuid.UUID) ArticleID {
 }
 
 func NewArticle(ID ArticleID, title ArticleTitle, URL ArticleURL, readDatetime ArticleReadDateTime, savedDatetime ArticleSavedDateTime, tags []*Tag) (*Article, error) {
-	if _, err := url.ParseRequestURI(URL.value); err != nil {
-		return nil, errors.Wrap(err, InvalidArticleURL.Error())
-	}
 	if title.Len() > TitleMaxLength {
 		return nil, errors.WithMessage(ArticleTitleIsTooLong, fmt.Sprintf(" length : %d", title.Len()))
 	}
 	return &Article{id: ID, title: title, url: URL, readDateTime: readDatetime, savedDateTime: savedDatetime, tags: tags}, nil
 }
 
-func CreateArticle(id ArticleID, title ArticleTitle, url ArticleURL) (*Article, error) {
-	return NewArticle(id, title, url, NewArticleReadDateTime(), NewArticleSavedDateTime(), NewEmptyTags())
+func CreateArticle(title ArticleTitle, url ArticleURL) (*Article, error) {
+	id := NewArticleID(uuid.NewV4())
+	return NewArticle(id, title, url, NewArticleReadDateTime(time.Time{}), NewArticleSavedDateTime(time.Now()), NewEmptyTags())
 }
 
-func NewArticleSavedDateTime() ArticleSavedDateTime {
-	return ArticleSavedDateTime{time.Time{}}
+func NewArticleSavedDateTime(t time.Time) ArticleSavedDateTime {
+	return ArticleSavedDateTime{t}
 }
 
-func NewArticleReadDateTime() ArticleReadDateTime {
-	return ArticleReadDateTime{time.Time{}}
+func NewArticleReadDateTime(t time.Time) ArticleReadDateTime {
+	return ArticleReadDateTime{t}
 }
 
 func NewEmptyTags() []*Tag {
@@ -182,10 +180,7 @@ func (a *Article) Read(time time.Time) error {
 	if !a.readDateTime.IsZero() {
 		return ArticleHasAlreadyBeenRead
 	}
-	_, err := a.UpdateReadDateTime(time)
-	if err != nil {
-		return errors.Wrap(err, "failed to read article")
-	}
+	a.UpdateReadDateTime(time)
 	return nil
 }
 
@@ -193,11 +188,8 @@ func (a *Article) HasBeenRead() bool {
 	return !a.ReadDateTime().IsZero()
 }
 
-func (a *Article) UpdateReadDateTime(t time.Time) (ArticleReadDateTime, error) {
-	dt, err := NewArticleReadDateTime().Update(t)
-	if err != nil {
-		return ArticleReadDateTime{}, err
-	}
+func (a *Article) UpdateReadDateTime(t time.Time) (ArticleReadDateTime) {
+	dt := NewArticleReadDateTime(t)
 	a.readDateTime = dt
-	return a.readDateTime, nil
+	return a.readDateTime
 }

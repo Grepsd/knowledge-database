@@ -6,31 +6,31 @@ import (
 	"github.com/grepsd/knowledge-database/internal/domain/repository"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
+	"time"
 )
 
 type SaveArticle struct {
-	command    article.SaveArticle
 	repository repository.Article
 }
 
-func NewSaveArticle(command article.SaveArticle, repository repository.Article) SaveArticle {
-	return SaveArticle{command: command, repository: repository}
+func NewSaveArticle(repository repository.Article) SaveArticle {
+	return SaveArticle{repository: repository}
 }
 
-func (s *SaveArticle) Execute() (*entity.Article, error) {
-	article, err := entity.NewArticle(
+func (s *SaveArticle) Handle(command article.SaveArticle) (*entity.Article, error) {
+	newArticle, err := entity.NewArticle(
 		entity.NewArticleID(uuid.NewV4()),
-		s.command.Title(),
-		s.command.Url(),
-		entity.NewArticleReadDateTime(),
-		s.command.Datetime(),
+		command.Title(),
+		command.Url(),
+		entity.NewArticleReadDateTime(time.Time{}),
+		command.Datetime(),
 		entity.NewEmptyTags())
 	if err != nil {
 		return &entity.Article{}, errors.Wrap(err, "command failed")
 	}
-	err = s.repository.Save(article)
+	err = s.repository.Save(newArticle)
 	if err != nil {
 		return &entity.Article{}, errors.Wrap(err, "repository save failed")
 	}
-	return article, nil
+	return newArticle, nil
 }

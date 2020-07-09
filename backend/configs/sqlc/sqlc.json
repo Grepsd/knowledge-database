@@ -1,0 +1,12 @@
+create table articles
+(
+    id             varchar(70) not null constraint articles_pk primary key,
+    title          varchar(255),
+    url            varchar(255),
+    saved_datetime datetime    not null,
+    read_datetime  datetime default null
+);
+
+-- name: GetOneById :one
+SELECT * FROM articles
+WHERE id = $id;
