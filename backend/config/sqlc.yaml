@@ -1,0 +1,21 @@
+version: "1"
+packages:
+  - name: "pgsql"
+    path: "../pkg/infrastructure/persistence/pgsql"
+    queries: "./sql/query/"
+    schema: "./sql/schema/"
+    engine: "postgresql"
+    emit_json_tags: true
+    emit_prepared_queries: true
+    emit_interface: false
+    emit_exact_table_names: false
+
+overrides:
+  - go_type: "github.com/google/uuid.UUID"
+    db_type: "uuid"
+rename:
+  savedon: SavedOn
+  readon: ReadOn
+  id: ID
+  title: Title
+  url: URL
