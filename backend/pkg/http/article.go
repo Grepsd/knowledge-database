@@ -139,52 +139,12 @@ func (a *articleHTTPHandler) putArticle(w http.ResponseWriter, r *http.Request) 
 	if id, err := uuid.FromBytes([]byte(uriIdentifier)); err != nil && id.String() != "00000000-0000-0000-0000-000000000000" {
 		art.ID = id
 		a.updateArticleByID(w, r, art)
-		return
-	}
-	slug, err := article.GenerateSlugFromTitle(uriIdentifier)
-	if err != nil {
-		a.helpers.writeErrorResponse(w, r, fmt.Errorf("uriIdentifier : %w", err))
-		return
-	}
-	art.Slug = slug
-
-	registeredArticle, err := a.repository.GetOneBySlug(slug)
-	if err != nil {
-		if errors.As(err, fmt.Errorf("article not found")) {
-			art.ID = uuid.New()
-			err = a.repository.Create(*art)
-			if err != nil {
-				a.helpers.writeErrorResponse(w, r, fmt.Errorf("failed to create article: %w", err))
-				return
-			}
-			newArticle, err := a.repository.GetOneById(art.ID)
-			if err != nil {
-				a.helpers.writeErrorResponse(w, r, fmt.Errorf("failed to retrieve newly created article: %w", err))
-				return
-			}
-			err = a.helpers.respondWithJSON(w, http.StatusCreated, newArticle)
-			if err != nil {
-				a.helpers.writeErrorResponse(w, r, fmt.Errorf("failed to write response : %w", err))
-				return
-			}
+		art, err := a.repository.GetOneById(id)
+		if err != nil {
+			a.helpers.writeErrorResponse(w, r, fmt.Errorf("failed to load updated article: %w", err))
 			return
 		}
-	}
-
-	art.ID = registeredArticle.ID
-	err = a.repository.Update(*art)
-	if err != nil {
-		a.helpers.writeErrorResponse(w, r, fmt.Errorf("update product failed : %w", err))
-		return
-	}
-	newArticle, err := a.repository.GetOneById(art.ID)
-	if err != nil {
-		a.helpers.writeErrorResponse(w, r, fmt.Errorf("failed to retrieve newly created article: %w", err))
-		return
-	}
-	err = a.helpers.respondWithJSON(w, http.StatusOK, newArticle)
-	if err != nil {
-		a.helpers.writeErrorResponse(w, r, fmt.Errorf("failed to write response : %w", err))
+		a.helpers.respondWithJSON(w, http.StatusOK, art)
 		return
 	}
 }

@@ -37,7 +37,7 @@ func NewArticle(id uuid.UUID, title string, url string, slug string) *Article {
 func GenerateSlugFromTitle(title string) (string, error) {
 	re, err := regexp.Compile("[^a-zA-Z0-9-_]+")
 	if err != nil {
-		return nil, fmt.Errorf("failed to compile regexp : %w", err)
+		return "", fmt.Errorf("failed to compile regexp : %w", err)
 	}
 	slug := string(bytes.ToLower(re.ReplaceAll([]byte(title), []byte("_"))))
 	return slug, err
