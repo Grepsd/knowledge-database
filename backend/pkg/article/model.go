@@ -14,6 +14,22 @@ type Article struct {
 	Slug  string    `json "slug"`
 }
 
+type ReadRepositoryer interface {
+	GetOneById(id uuid.UUID) (Article, error)
+	GetOneBySlug(slug string) (Article, error)
+	GetAll() ([]Article, error)
+}
+type WriteRepositoryer interface {
+	Create(article Article) error
+	Update(article Article) error
+	DeleteById(id uuid.UUID) error
+}
+
+type ReadWriteRepositoryer interface {
+	ReadRepositoryer
+	WriteRepositoryer
+}
+
 func NewArticle(id uuid.UUID, title string, url string, slug string) *Article {
 	return &Article{ID: id, Title: title, URL: url, Slug: slug}
 }

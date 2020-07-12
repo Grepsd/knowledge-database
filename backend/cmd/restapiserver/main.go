@@ -1,9 +1,13 @@
 package main
 
-import "github.com/grepsd/knowledge-database/pkg"
+import (
+	"github.com/grepsd/knowledge-database/pkg"
+	"github.com/grepsd/knowledge-database/pkg/sql"
+)
 
 func main() {
-	db := pkg.NewDB("user=postgres password=tpassword database=knowledge-database sslmode=disable")
-	s := pkg.NewServer(db)
+	db := sql.NewDB("user=postgres password=tpassword database=knowledge-database sslmode=disable")
+	articleRepository := sql.NewArticleRepository(db)
+	s := pkg.NewServer(articleRepository)
 	s.Init()
 }

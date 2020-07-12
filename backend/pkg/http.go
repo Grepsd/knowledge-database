@@ -13,11 +13,11 @@ import (
 )
 
 type Server struct {
-	db *DB
+	articleRepository article.ReadWriteRepositoryer
 }
 
-func NewServer(db *DB) *Server {
-	return &Server{db}
+func NewServer(articleRepository article.ReadWriteRepositoryer) *Server {
+	return &Server{articleRepository: articleRepository}
 }
 
 func (s *Server) Init() {
@@ -73,7 +73,7 @@ func (s *Server) CreateArticle(w http.ResponseWriter, r *http.Request) {
 	}
 	art.Slug = slug
 
-	err = s.db.CreateArticle(art)
+	err = s.articleRepository.Create(*art)
 	if err != nil {
 		if strings.Contains(err.Error(), " duplicate key value violates") {
 			w.WriteHeader(http.StatusConflict)
@@ -88,7 +88,7 @@ func (s *Server) CreateArticle(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) ListArticles(w http.ResponseWriter, r *http.Request) {
-	articles, err := s.db.ListArticles()
+	articles, err := s.articleRepository.GetAll()
 	if err != nil {
 		s.writeErrorResponse(w, r, fmt.Errorf("failed to list articles: %w", err))
 		return
@@ -100,7 +100,7 @@ func (s *Server) GetArticleById(w http.ResponseWriter, r *http.Request) {
 	var art article.Article
 	key := s.getLastSegmentFromURI(r)
 	if id, err := uuid.Parse(key); err == nil && id.String() != "00000000-0000-0000-0000-000000000000" {
-		art, err = s.db.GetOneById(id)
+		art, err = s.articleRepository.GetOneById(id)
 		if err != nil {
 			s.writeErrorResponse(w, r, fmt.Errorf("failed to retrieve article by id: %w", err))
 			return
@@ -111,7 +111,7 @@ func (s *Server) GetArticleById(w http.ResponseWriter, r *http.Request) {
 			s.writeErrorResponse(w, r, err)
 			return
 		}
-		art, err = s.db.GetOneBySlug(string(title))
+		art, err = s.articleRepository.GetOneBySlug(string(title))
 		if err != nil {
 			s.writeErrorResponse(w, r, fmt.Errorf("failed to get article by slug: %w", err))
 			return
@@ -165,16 +165,16 @@ func (s *Server) PutArticle(w http.ResponseWriter, r *http.Request) {
 	}
 	art.Slug = slug
 
-	registeredArticle, err := s.db.GetOneBySlug(slug)
+	registeredArticle, err := s.articleRepository.GetOneBySlug(slug)
 	if err != nil {
 		if errors.As(err, fmt.Errorf("article not found")) {
 			art.ID = uuid.New()
-			err = s.db.CreateArticle(art)
+			err = s.articleRepository.Create(*art)
 			if err != nil {
 				s.writeErrorResponse(w, r, fmt.Errorf("failed to create article: %w", err))
 				return
 			}
-			newArticle, err := s.db.GetOneById(art.ID)
+			newArticle, err := s.articleRepository.GetOneById(art.ID)
 			if err != nil {
 				s.writeErrorResponse(w, r, fmt.Errorf("failed to retrieve newly created article: %w", err))
 				return
@@ -189,12 +189,12 @@ func (s *Server) PutArticle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	art.ID = registeredArticle.ID
-	err = s.db.UpdateArticle(art)
+	err = s.articleRepository.Update(*art)
 	if err != nil {
 		s.writeErrorResponse(w, r, fmt.Errorf("update product failed : %w", err))
 		return
 	}
-	newArticle, err := s.db.GetOneById(art.ID)
+	newArticle, err := s.articleRepository.GetOneById(art.ID)
 	if err != nil {
 		s.writeErrorResponse(w, r, fmt.Errorf("failed to retrieve newly created article: %w", err))
 		return
@@ -226,7 +226,7 @@ func (s *Server) writeJson(w http.ResponseWriter, data interface{}) error {
 }
 
 func (s *Server) updateArticleByID(w http.ResponseWriter, r *http.Request, art *article.Article) {
-	_, err := s.db.GetOneById(art.ID)
+	_, err := s.articleRepository.GetOneById(art.ID)
 	if err != nil {
 		if errors.As(err, errors.New("article not found")) {
 			http.NotFound(w, r)
@@ -241,7 +241,7 @@ func (s *Server) updateArticleByID(w http.ResponseWriter, r *http.Request, art *
 		return
 	}
 	art.Slug = slug
-	err = s.db.UpdateArticle(art)
+	err = s.articleRepository.Update(*art)
 	if err != nil {
 		s.writeErrorResponse(w, r, fmt.Errorf("failed to update article : %w", err))
 		return
