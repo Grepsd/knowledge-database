@@ -14,7 +14,7 @@ func NewServer(articles articleHTTPHandler) *Server {
 }
 
 func (s *Server) Init() {
-	http.HandleFunc("/articles", s.articles.Articles())
-	http.HandleFunc("/articles/", s.articles.Article())
+	http.HandleFunc("/articles", s.articles.routeCollection())
+	http.HandleFunc("/articles/", s.articles.routeItem())
 	log.Fatal(http.ListenAndServe(":8888", nil))
 }

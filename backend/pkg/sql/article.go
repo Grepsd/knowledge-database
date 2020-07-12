@@ -6,14 +6,14 @@ import (
 	"github.com/grepsd/knowledge-database/pkg/article"
 )
 
-type ArticleRepository struct {
+type articleRepository struct {
 	db DBer
 }
 
-func NewArticleRepository(db DBer) ArticleRepository {
-	return ArticleRepository{db: db}
+func NewArticleRepository(db DBer) articleRepository {
+	return articleRepository{db: db}
 }
-func (r ArticleRepository) Create(a article.Article) error {
+func (r articleRepository) Create(a article.Article) error {
 	query := `INSERT INTO articles (id, title, url, slug)
 VALUES ($1, $2, $3, $4)`
 	stmt, err := r.db.Prepare(query)
@@ -27,7 +27,7 @@ VALUES ($1, $2, $3, $4)`
 	return nil
 }
 
-func (r ArticleRepository) GetAll() ([]article.Article, error) {
+func (r articleRepository) GetAll() ([]article.Article, error) {
 	var articles []article.Article
 	query := `SELECT id, title, url, slug FROM articles ORDER BY title`
 	results, err := r.db.Query(query)
@@ -47,7 +47,7 @@ func (r ArticleRepository) GetAll() ([]article.Article, error) {
 	return articles, nil
 }
 
-func (r ArticleRepository) GetOneById(id uuid.UUID) (art article.Article, err error) {
+func (r articleRepository) GetOneById(id uuid.UUID) (art article.Article, err error) {
 	const query = `SELECT id, title, url, slug FROM articles WHERE id = $1`
 	result, err := r.db.Query(query, id)
 	if err != nil {
@@ -65,7 +65,7 @@ func (r ArticleRepository) GetOneById(id uuid.UUID) (art article.Article, err er
 	return art, err
 }
 
-func (r ArticleRepository) GetOneBySlug(slug string) (art article.Article, err error) {
+func (r articleRepository) GetOneBySlug(slug string) (art article.Article, err error) {
 	const query = `SELECT id, title, url, slug FROM articles WHERE slug = $1`
 	result, err := r.db.Query(query, slug)
 	if err != nil {
@@ -83,7 +83,7 @@ func (r ArticleRepository) GetOneBySlug(slug string) (art article.Article, err e
 	return art, err
 }
 
-func (r ArticleRepository) Update(a article.Article) (err error) {
+func (r articleRepository) Update(a article.Article) (err error) {
 	query := `UPDATE articles SET title=$2, url=$3, slug=$4 WHERE id = $1`
 	_, err = r.db.Exec(query, a.ID.String(), a.Title, a.URL, a.Slug)
 	if err != nil {
@@ -92,7 +92,7 @@ func (r ArticleRepository) Update(a article.Article) (err error) {
 	return err
 }
 
-func (r ArticleRepository) DeleteById(id uuid.UUID) error {
+func (r articleRepository) DeleteById(id uuid.UUID) error {
 	query := `DELETE FROM articles WHERE id = $1`
 	_, err := r.db.Exec(query, id.String())
 	if err != nil {

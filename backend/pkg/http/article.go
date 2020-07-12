@@ -12,41 +12,41 @@ import (
 )
 
 type articleHTTPHandler struct {
-	helpers    Helpers
+	helpers    helpers
 	repository article.ReadWriteRepositoryer
 }
 
-func NewArticleHTTPHandler(s Helpers, r article.ReadWriteRepositoryer) articleHTTPHandler {
+func NewArticleHTTPHandler(s helpers, r article.ReadWriteRepositoryer) articleHTTPHandler {
 	return articleHTTPHandler{helpers: s, repository: r}
 }
 
-func (a *articleHTTPHandler) Articles() http.HandlerFunc {
+func (a *articleHTTPHandler) routeCollection() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
-			a.Create(w, r)
+			a.create(w, r)
 			break
 		case http.MethodGet:
-			a.ListArticles(w, r)
+			a.listArticles(w, r)
 			break
 		}
 	}
 }
 
-func (a *articleHTTPHandler) Article() http.HandlerFunc {
+func (a *articleHTTPHandler) routeItem() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
-			a.GetArticleById(w, r)
+			a.getArticleById(w, r)
 			break
 		case http.MethodPut:
-			a.PutArticle(w, r)
+			a.putArticle(w, r)
 			break
 		}
 	}
 }
 
-func (a *articleHTTPHandler) Create(w http.ResponseWriter, r *http.Request) {
+func (a *articleHTTPHandler) create(w http.ResponseWriter, r *http.Request) {
 	payload, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
@@ -81,7 +81,7 @@ func (a *articleHTTPHandler) Create(w http.ResponseWriter, r *http.Request) {
 	a.helpers.respondWithJSON(w, http.StatusCreated, art)
 }
 
-func (a *articleHTTPHandler) ListArticles(w http.ResponseWriter, r *http.Request) {
+func (a *articleHTTPHandler) listArticles(w http.ResponseWriter, r *http.Request) {
 	articles, err := a.repository.GetAll()
 	if err != nil {
 		a.helpers.writeErrorResponse(w, r, fmt.Errorf("failed to list articles: %w", err))
@@ -90,7 +90,7 @@ func (a *articleHTTPHandler) ListArticles(w http.ResponseWriter, r *http.Request
 	a.helpers.respondWithJSON(w, http.StatusOK, articles)
 }
 
-func (a *articleHTTPHandler) GetArticleById(w http.ResponseWriter, r *http.Request) {
+func (a *articleHTTPHandler) getArticleById(w http.ResponseWriter, r *http.Request) {
 	var art article.Article
 	key := a.helpers.getLastSegmentFromURI(r)
 	if id, err := uuid.Parse(key); err == nil && id.String() != "00000000-0000-0000-0000-000000000000" {
@@ -116,7 +116,7 @@ func (a *articleHTTPHandler) GetArticleById(w http.ResponseWriter, r *http.Reque
 	a.helpers.respondWithJSON(w, http.StatusOK, art)
 }
 
-func (a *articleHTTPHandler) PutArticle(w http.ResponseWriter, r *http.Request) {
+func (a *articleHTTPHandler) putArticle(w http.ResponseWriter, r *http.Request) {
 	art := new(article.Article)
 	payload, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()

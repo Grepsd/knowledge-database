@@ -7,14 +7,14 @@ import (
 	"strings"
 )
 
-type Helpers struct {
+type helpers struct {
 }
 
-func NewHelpers() Helpers {
-	return Helpers{}
+func NewHelpers() helpers {
+	return helpers{}
 }
 
-func (h *Helpers) respondWithJSON(w http.ResponseWriter, statusCode int, data interface{}) error {
+func (h *helpers) respondWithJSON(w http.ResponseWriter, statusCode int, data interface{}) error {
 	h.writeJsonContentType(w)
 	if statusCode != http.StatusOK {
 		w.WriteHeader(statusCode)
@@ -23,12 +23,12 @@ func (h *Helpers) respondWithJSON(w http.ResponseWriter, statusCode int, data in
 	return err
 }
 
-func (h *Helpers) writeErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
+func (h *helpers) writeErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
 	w.WriteHeader(http.StatusInternalServerError)
 	fmt.Print(err)
 }
 
-func (h *Helpers) writeResponse(w http.ResponseWriter, data string) error {
+func (h *helpers) writeResponse(w http.ResponseWriter, data string) error {
 	_, err := fmt.Fprint(w, data)
 	if err != nil {
 		err = fmt.Errorf("failed to write to responseWriter : %w", err)
@@ -36,17 +36,17 @@ func (h *Helpers) writeResponse(w http.ResponseWriter, data string) error {
 	return err
 }
 
-func (h *Helpers) writeJsonContentType(w http.ResponseWriter) {
+func (h *helpers) writeJsonContentType(w http.ResponseWriter) {
 	w.Header().Add("Content-Type", "application/json")
 }
 
-func (h *Helpers) getLastSegmentFromURI(r *http.Request) string {
+func (h *helpers) getLastSegmentFromURI(r *http.Request) string {
 	uri := r.RequestURI
 	parts := strings.Split(uri, "/")
 	return parts[len(parts)-1]
 }
 
-func (h *Helpers) writeJson(w http.ResponseWriter, data interface{}) error {
+func (h *helpers) writeJson(w http.ResponseWriter, data interface{}) error {
 	payload, err := json.Marshal(data)
 	if err != nil {
 		return fmt.Errorf("failed to marshall: %w", err)

@@ -12,27 +12,27 @@ type DBer interface {
 	Prepare(string) (*sql.Stmt, error)
 }
 
-type DB struct {
+type db struct {
 	connection *sql.DB
 }
 
-func NewDB(dsn string) DB {
-	db, err := sql.Open("postgres", dsn)
+func NewDB(dsn string) db {
+	connection, err := sql.Open("postgres", dsn)
 	if err != nil {
 		log.Fatal("failed to connect to articleRepository : " + err.Error())
 	}
-	return DB{db}
+	return db{connection}
 }
 
-func (db DB) Exec(query string, args ...interface{}) (sql.Result, error) {
+func (db db) Exec(query string, args ...interface{}) (sql.Result, error) {
 	results, err := db.connection.Exec(query, args...)
 	return results, err
 }
-func (db DB) Query(query string, args ...interface{}) (*sql.Rows, error) {
+func (db db) Query(query string, args ...interface{}) (*sql.Rows, error) {
 	rows, err := db.connection.Query(query, args...)
 	return rows, err
 }
-func (db DB) Prepare(query string) (*sql.Stmt, error) {
+func (db db) Prepare(query string) (*sql.Stmt, error) {
 	stmt, err := db.connection.Prepare(query)
 	return stmt, err
 }
