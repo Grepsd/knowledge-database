@@ -2,6 +2,7 @@ package sql
 
 import (
 	"database/sql"
+	_ "github.com/lib/pq"
 	"log"
 )
 
