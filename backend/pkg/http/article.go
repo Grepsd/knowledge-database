@@ -12,11 +12,11 @@ import (
 )
 
 type articleHTTPHandler struct {
-	helpers    helpers
+	helpers    *helpers
 	repository article.ReadWriteRepositoryer
 }
 
-func NewArticleHTTPHandler(s helpers, r article.ReadWriteRepositoryer) articleHTTPHandler {
+func NewArticleHTTPHandler(s *helpers, r article.ReadWriteRepositoryer) articleHTTPHandler {
 	return articleHTTPHandler{helpers: s, repository: r}
 }
 

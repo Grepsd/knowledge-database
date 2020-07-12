@@ -10,8 +10,8 @@ import (
 type helpers struct {
 }
 
-func NewHelpers() helpers {
-	return helpers{}
+func NewHelpers() *helpers {
+	return &helpers{}
 }
 
 func (h *helpers) respondWithJSON(w http.ResponseWriter, statusCode int, data interface{}) error {

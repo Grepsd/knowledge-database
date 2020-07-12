@@ -7,7 +7,7 @@ import (
 
 func main() {
 	db := sql.NewDB("user=postgres password=tpassword database=knowledge-database sslmode=disable")
-	articleRepository := sql.NewArticleRepository(db)
+	articleRepository := sql.NewArticleRepository(&db)
 	httpHelpers := http.NewHelpers()
 	articleHandler := http.NewArticleHTTPHandler(httpHelpers, articleRepository)
 	s := http.NewServer(articleHandler)

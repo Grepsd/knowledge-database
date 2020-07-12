@@ -10,8 +10,8 @@ type articleRepository struct {
 	db DBer
 }
 
-func NewArticleRepository(db DBer) articleRepository {
-	return articleRepository{db: db}
+func NewArticleRepository(db DBer) *articleRepository {
+	return &articleRepository{db: db}
 }
 func (r articleRepository) Create(a article.Article) error {
 	query := `INSERT INTO articles (id, title, url, slug)
