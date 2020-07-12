@@ -58,3 +58,7 @@ func (h *helpers) writeJson(w http.ResponseWriter, data interface{}) error {
 	}
 	return err
 }
+
+func (h *helpers) isUserAuthenticated(r *http.Request) bool {
+	return r.Context().Value("auth").(bool)
+}

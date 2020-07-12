@@ -34,12 +34,11 @@ func NewArticle(id uuid.UUID, title string, url string, slug string) *Article {
 	return &Article{ID: id, Title: title, URL: url, Slug: slug}
 }
 
-func GenerateSlugFromTitle(title string) (slug string, err error) {
+func GenerateSlugFromTitle(title string) (string, error) {
 	re, err := regexp.Compile("[^a-zA-Z0-9-_]+")
 	if err != nil {
-		// "failed to compile regexp : "+err.Error()
-		return slug, fmt.Errorf("failed to compile regexp : %w", err)
+		return nil, fmt.Errorf("failed to compile regexp : %w", err)
 	}
-	slug = string(bytes.ToLower(re.ReplaceAll([]byte(title), []byte("_"))))
+	slug := string(bytes.ToLower(re.ReplaceAll([]byte(title), []byte("_"))))
 	return slug, err
 }

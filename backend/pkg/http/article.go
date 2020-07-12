@@ -117,6 +117,12 @@ func (a *articleHTTPHandler) getArticleById(w http.ResponseWriter, r *http.Reque
 }
 
 func (a *articleHTTPHandler) putArticle(w http.ResponseWriter, r *http.Request) {
+	if authorized, ok := r.Context().Value("auth").(bool) ; ok {
+		if !authorized {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+	}
 	art := new(article.Article)
 	payload, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
