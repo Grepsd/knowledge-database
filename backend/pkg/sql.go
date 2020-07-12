@@ -63,7 +63,7 @@ func (d *DB) GetOneById(id uuid.UUID) (art article.Article, err error) {
 	}
 	var articleID string
 	if !result.Next() {
-		return art, errors.New("no article found")
+		return art, errors.New("article not found")
 	}
 	err = result.Scan(&articleID, &art.Title, &art.URL, &art.Slug)
 	if err != nil {
@@ -82,7 +82,7 @@ func (d *DB) GetOneBySlug(slug string) (art article.Article, err error) {
 	}
 	var articleID string
 	if !result.Next() {
-		return art, errors.New("no article found")
+		return art, errors.New("article not found")
 	}
 	err = result.Scan(&articleID, &art.Title, &art.URL, &art.Slug)
 	if err != nil {

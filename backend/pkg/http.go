@@ -1,15 +1,14 @@
 package pkg
 
 import (
-	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/grepsd/knowledge-database/pkg/article"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"regexp"
 	"strings"
 )
 
@@ -45,6 +44,9 @@ func (s *Server) Article() http.HandlerFunc {
 		switch r.Method {
 		case http.MethodGet:
 			s.GetArticleById(w, r)
+			break
+		case http.MethodPut:
+			s.PutArticle(w, r)
 			break
 		}
 	}
@@ -92,42 +94,177 @@ func (s *Server) ListArticles(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	resp, err := json.Marshal(articles)
 	if err != nil {
-		log.Fatal("failed to marshall : " + err.Error())
+		s.writeErrorResponse(w, r, fmt.Errorf("failed to marshall : %w", err))
+		return
 	}
 	_, err = fmt.Fprintf(w, string(resp))
 }
 
 func (s *Server) GetArticleById(w http.ResponseWriter, r *http.Request) {
 	var art article.Article
-	uri := r.RequestURI
-	fmt.Println(uri)
-	parts := strings.Split(uri, "/")
-	key := parts[len(parts)-1]
+	key := s.getLastSegmentFromURI(r)
 	if id, err := uuid.FromBytes([]byte(key)); err != nil && id.String() != "00000000-0000-0000-0000-000000000000" {
 		art, err = s.db.GetOneById(id)
 	} else {
-		re, err := regexp.Compile("[^a-zA-Z0-9-_]+")
+		title, err := article.GenerateSlugFromTitle(key)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, "failed to compile regexp : "+err.Error())
+			s.writeErrorResponse(w, r, err)
 			return
 		}
-		res := bytes.ToLower(re.ReplaceAll([]byte(key), []byte("_")))
-
-		art, err = s.db.GetOneBySlug(string(res))
+		art, err = s.db.GetOneBySlug(string(title))
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, "failed to get article : "+err.Error())
+			s.writeErrorResponse(w, r, fmt.Errorf("failed to get article : %w", err))
 			return
 		}
 
 	}
 
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 	resp, err := json.Marshal(art)
 	if err != nil {
-		log.Fatal("failed to marshall : " + err.Error())
+		s.writeErrorResponse(w, r, fmt.Errorf("failed to marshall : %w", err))
+		return
 	}
-	_, err = fmt.Fprintf(w, string(resp))
+	s.writeJsonContentType(w)
+	w.WriteHeader(http.StatusOK)
+	err = s.writeResponse(w, string(resp))
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (s *Server) writeErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
+	w.WriteHeader(http.StatusInternalServerError)
+	fmt.Print(err)
+}
+
+func (s *Server) writeResponse(w http.ResponseWriter, data string) error {
+	_, err := fmt.Fprint(w, data)
+	if err != nil {
+		err = fmt.Errorf("failed to write to responseWriter : %w", err)
+	}
+	return err
+}
+
+func (s *Server) writeJsonContentType(w http.ResponseWriter) {
+	w.Header().Add("Content-Type", "application/json")
+}
+
+func (s *Server) PutArticle(w http.ResponseWriter, r *http.Request) {
+	art := new(article.Article)
+	payload, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		s.writeErrorResponse(w, r, fmt.Errorf(" : %w", err))
+		return
+	}
+	err = json.Unmarshal(payload, art)
+	if err != nil {
+		s.writeErrorResponse(w, r, fmt.Errorf("failed to json.decode payload : %w", err))
+		return
+	}
+	uriIdentifier := s.getLastSegmentFromURI(r)
+	if id, err := uuid.FromBytes([]byte(uriIdentifier)); err != nil && id.String() != "00000000-0000-0000-0000-000000000000" {
+		art.ID = id
+		s.updateArticleByID(w, r, art)
+		return
+	}
+	slug, err := article.GenerateSlugFromTitle(uriIdentifier)
+	if err != nil {
+		s.writeErrorResponse(w, r, fmt.Errorf("uriIdentifier : %w", err))
+		return
+	}
+	art.Slug = slug
+
+	registeredArticle, err := s.db.GetOneBySlug(slug)
+	if err != nil {
+		if errors.As(err, fmt.Errorf("article not found")) {
+			art.ID = uuid.New()
+			err = s.db.CreateArticle(art)
+			if err != nil {
+				s.writeErrorResponse(w, r, fmt.Errorf("failed to create article: %w", err))
+				return
+			}
+			newArticle, err := s.db.GetOneById(art.ID)
+			if err != nil {
+				s.writeErrorResponse(w, r, fmt.Errorf("failed to retrieve newly created article: %w", err))
+				return
+			}
+			err = s.respondWithJson(w, http.StatusCreated, newArticle)
+			if err != nil {
+				s.writeErrorResponse(w, r, fmt.Errorf("failed to write response : %w", err))
+				return
+			}
+			return
+		}
+	}
+
+	art.ID = registeredArticle.ID
+	err = s.db.UpdateArticle(art)
+	if err != nil {
+		s.writeErrorResponse(w, r, fmt.Errorf("update product failed : %w", err))
+		return
+	}
+	newArticle, err := s.db.GetOneById(art.ID)
+	if err != nil {
+		s.writeErrorResponse(w, r, fmt.Errorf("failed to retrieve newly created article: %w", err))
+		return
+	}
+	err = s.respondWithJson(w, http.StatusOK, newArticle)
+	if err != nil {
+		s.writeErrorResponse(w, r, fmt.Errorf("failed to write response : %w", err))
+		return
+	}
+}
+
+func (s *Server) getLastSegmentFromURI(r *http.Request) string {
+	uri := r.RequestURI
+	parts := strings.Split(uri, "/")
+	return parts[len(parts)-1]
+}
+
+func (s *Server) writeJson(w http.ResponseWriter, data interface{}) error {
+	payload, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("failed to marshall: %w", err)
+	}
+	s.writeJsonContentType(w)
+	_, err = w.Write(payload)
+	if err != nil {
+		panic("failed to write response: " + err.Error())
+	}
+	return err
+}
+
+func (s *Server) updateArticleByID(w http.ResponseWriter, r *http.Request, art *article.Article) {
+	_, err := s.db.GetOneById(art.ID)
+	if err != nil {
+		if errors.As(err, errors.New("article not found")) {
+			http.NotFound(w, r)
+			return
+		}
+		s.writeErrorResponse(w, r, fmt.Errorf("failed to load article : %w", err))
+		return
+	}
+	slug, err := article.GenerateSlugFromTitle(art.Title)
+	if err != nil {
+		s.writeErrorResponse(w, r, fmt.Errorf("failed to generate slug : %w", err))
+		return
+	}
+	art.Slug = slug
+	err = s.db.UpdateArticle(art)
+	if err != nil {
+		s.writeErrorResponse(w, r, fmt.Errorf("failed to update article : %w", err))
+		return
+	}
+	err = s.respondWithJson(w, http.StatusOK, art)
+	if err != nil {
+		s.writeErrorResponse(w, r, fmt.Errorf("failed to write response : %w", err))
+		return
+	}
+	return
+}
+
+func (s *Server) respondWithJson(w http.ResponseWriter, statusCode int, data interface{}) error {
+	err := s.writeJson(w, data)
+	w.WriteHeader(statusCode)
+	return err
 }
