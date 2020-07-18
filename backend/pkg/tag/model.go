@@ -1,10 +1,28 @@
 package tag
 
+import "github.com/google/uuid"
+
 type Tag struct {
-	ID   string
-	Name string
+	ID   uuid.UUID `json "id"`
+	Name string    `json "name"`
 }
 
-func NewTag(id string, name string) *Tag {
+func NewTag(id uuid.UUID, name string) *Tag {
 	return &Tag{ID: id, Name: name}
+}
+
+type ReadRepositoryer interface {
+	GetOneById(id uuid.UUID) (Tag, error)
+	GetOneByName(name string) (Tag, error)
+	GetAll() ([]Tag, error)
+}
+type WriteRepositoryer interface {
+	Create(article Tag) error
+	Update(article Tag) error
+	DeleteById(id uuid.UUID) error
+}
+
+type ReadWriteRepositoryer interface {
+	ReadRepositoryer
+	WriteRepositoryer
 }

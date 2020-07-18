@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/grepsd/knowledge-database/pkg/tag"
 	"regexp"
 )
 
@@ -12,6 +13,7 @@ type Article struct {
 	Title string    `json "title"`
 	URL   string    `json "url"`
 	Slug  string    `json "slug"`
+	Tags  []*tag.Tag    `json "tags"`
 }
 
 type ReadRepositoryer interface {
@@ -23,6 +25,7 @@ type WriteRepositoryer interface {
 	Create(article Article) error
 	Update(article Article) error
 	DeleteById(id uuid.UUID) error
+	AssignTagToArticle(articleID uuid.UUID, tagID uuid.UUID) error
 }
 
 type ReadWriteRepositoryer interface {
@@ -30,8 +33,8 @@ type ReadWriteRepositoryer interface {
 	WriteRepositoryer
 }
 
-func NewArticle(id uuid.UUID, title string, url string, slug string) *Article {
-	return &Article{ID: id, Title: title, URL: url, Slug: slug}
+func NewArticle(id uuid.UUID, title string, url string, slug string, tags []*tag.Tag) *Article {
+	return &Article{ID: id, Title: title, URL: url, Slug: slug, Tags: tags}
 }
 
 func GenerateSlugFromTitle(title string) (string, error) {

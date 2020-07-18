@@ -1,0 +1,146 @@
+[
+  {
+    "ID": "34377718-f7d2-4273-bce7-6a9e8e6434a6",
+    "Title": "\n    A Complete Guide to Flexb...",
+    "URL": "https://css-tricks.com/snippets/css/a-guide-to-flexbox/",
+    "Slug": "_a_complete_guide_to_flexb_"
+  },
+  {
+    "ID": "5a8ffbcf-4c2c-442d-8e99-25a060b3e7e3",
+    "Title": "A guide to provisioning AWS EC...",
+    "URL": "https://dev.to/txheo/a-guide-to-provisioning-aws-ecs-fargate-using-terraform-1joo",
+    "Slug": "a_guide_to_provisioning_aws_ec_"
+  },
+  {
+    "ID": "2b28687c-6729-4efd-a9a8-de7a8bac4674",
+    "Title": "A guide to provisioning AWS EC...",
+    "URL": "https://dev.to/txheo/a-guide-to-provisioning-aws-ecs-fargate-using-terraform-1joo#gfdgfdffffffdf",
+    "Slug": "a_guide_to_provisioning_aws_ec_"
+  },
+  {
+    "ID": "3453dc9a-527d-4e93-8da9-3764d4d67987",
+    "Title": "avelino/awesome-go",
+    "URL": "https://github.com/avelino/awesome-go#messaging",
+    "Slug": "avelino_awesome-go"
+  },
+  {
+    "ID": "556bf576-85e3-41b3-9e47-a58f5015258f",
+    "Title": "CodeReviewComments · golang/go Wiki · GitHub",
+    "URL": "https://github.com/golang/go/wiki/CodeReviewComments#naked-returns",
+    "Slug": "codereviewcomments_golang_go_wiki_github"
+  },
+  {
+    "ID": "b58429f3-5f7b-449f-b932-f0aaf5d8e9d4",
+    "Title": "Configuration | Prometheus...",
+    "URL": "https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config",
+    "Slug": "configuration_prometheus_"
+  },
+  {
+    "ID": "cb7c3cf7-3519-4aeb-8ea5-5fc237ac5892",
+    "Title": "GitHub - axios/axios: Promise ...",
+    "URL": "https://github.com/axios/axios#request-config",
+    "Slug": "github_-_axios_axios_promise_"
+  },
+  {
+    "ID": "50b132e6-253f-46fb-a0fb-98a5894655e8",
+    "Title": "GitHub - cosmtrek/air: ☁️ Live...",
+    "URL": "https://github.com/cosmtrek/air",
+    "Slug": "github_-_cosmtrek_air_live_"
+  },
+  {
+    "ID": "1686bbb9-74c4-42b5-a2a6-654dc0c61e72",
+    "Title": "Go Build TPL",
+    "URL": "https://github.com/thockin/go-build-template",
+    "Slug": "go_build_tpl"
+  },
+  {
+    "ID": "a6d9b3f0-a796-4d14-8ba7-63bd8af7b295",
+    "Title": "Google SRE Preface",
+    "URL": "https://landing.google.com/sre/sre-book/chapters/preface/",
+    "Slug": "google_sre_preface"
+  },
+  {
+    "ID": "9351e8f2-979d-4595-8c81-873b014d1739",
+    "Title": "go style guide",
+    "URL": "https://github.com/uber-go/guide/blob/master/style.md#verify-interface-compliance",
+    "Slug": "go_style_guide"
+  },
+  {
+    "ID": "58251d55-ea6e-4a97-8b47-5845fcbac7d7",
+    "Title": "Go the unwritten parts",
+    "URL": "https://rakyll.org/",
+    "Slug": "go_the_unwritten_parts"
+  },
+  {
+    "ID": "44c21550-1be2-4104-b7cb-23643aff3c19",
+    "Title": "How Developers Stop Learning: ...",
+    "URL": "https://daedtech.com/how-developers-stop-learning-rise-of-the-expert-beginner/",
+    "Slug": "how_developers_stop_learning_"
+  },
+  {
+    "ID": "5605a508-601f-4906-a62e-df9770272d7e",
+    "Title": "How I write go service after 8 yr",
+    "URL": "https://pace.dev/blog/2018/05/09/how-I-write-http-services-after-eight-years.html",
+    "Slug": "how_i_write_go_service_after_8_yr"
+  },
+  {
+    "ID": "5df85c8e-8891-48f1-973f-631df7a4464b",
+    "Title": "Icons - Material Design...",
+    "URL": "https://material.io/resources/icons/?style=baseline",
+    "Slug": "icons_-_material_design_"
+  },
+  {
+    "ID": "71752755-e836-43d5-b2b6-a89200c7ec14",
+    "Title": "Joel on Software...",
+    "URL": "https://www.joelonsoftware.com/",
+    "Slug": "joel_on_software_"
+  },
+  {
+    "ID": "6898ce6a-c908-4fdb-801a-8b32d820d212",
+    "Title": "JSON-to-Go: Convert JSON to Go...",
+    "URL": "https://mholt.github.io/json-to-go/",
+    "Slug": "json-to-go_convert_json_to_go_"
+  },
+  {
+    "ID": "8bbe8bbb-2726-4ef3-9da2-e35633e2b316",
+    "Title": "Peter Bourgon",
+    "URL": "https://peter.bourgon.org/articles/",
+    "Slug": "peter_bourgon"
+  },
+  {
+    "ID": "428f822c-8285-4342-94c4-fc5c16d39f24",
+    "Title": "Peter Bourgon · Metrics, traci...",
+    "URL": "https://peter.bourgon.org/blog/2017/02/21/metrics-tracing-and-logging.html",
+    "Slug": "peter_bourgon_metrics_traci_"
+  },
+  {
+    "ID": "e3fe1f0c-5d7e-457c-92d3-cddfa3ccb515",
+    "Title": "pq package · pkg.go.dev",
+    "URL": "https://pkg.go.dev/github.com/lib/pq?tab",
+    "Slug": "pq_package_pkg_go_dev"
+  },
+  {
+    "ID": "9ec158e2-f407-4bed-8734-5d3f60017a58",
+    "Title": "Practical Go | Dave Cheney...",
+    "URL": "https://dave.cheney.net/practical-go",
+    "Slug": "practical_go_dave_cheney_"
+  },
+  {
+    "ID": "99b0dcf2-5f66-48b8-9a85-58ec75668406",
+    "Title": "Refactoring and Design Pattern...",
+    "URL": "https://refactoring.guru/",
+    "Slug": "refactoring_and_design_pattern_"
+  },
+  {
+    "ID": "61778088-71f1-4e4d-a34d-56bcb1b0d491",
+    "Title": "Snackbar component — Vuetify.j...",
+    "URL": "https://vuetifyjs.com/en/components/snackbars/",
+    "Slug": "snackbar_component_vuetify_j_"
+  },
+  {
+    "ID": "e457d628-28e2-4dad-8436-137e7da862fb",
+    "Title": "VueJS Global Event Bus",
+    "URL": "https://alligator.io/vuejs/global-event-bus/",
+    "Slug": "vuejs_global_event_bus"
+  }
+]

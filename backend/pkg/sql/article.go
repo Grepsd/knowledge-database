@@ -2,8 +2,11 @@ package sql
 
 import (
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/grepsd/knowledge-database/pkg/article"
+	"github.com/grepsd/knowledge-database/pkg/tag"
+	"strings"
 )
 
 type articleRepository struct {
@@ -13,6 +16,9 @@ type articleRepository struct {
 func NewArticleRepository(db DBer) *articleRepository {
 	return &articleRepository{db: db}
 }
+
+var ErrDuplicateKey = errors.New("duplicate key value violates unique constraint")
+
 func (r articleRepository) Create(a article.Article) error {
 	query := `INSERT INTO articles (id, title, url, slug)
 VALUES ($1, $2, $3, $4)`
@@ -99,4 +105,35 @@ func (r articleRepository) DeleteById(id uuid.UUID) error {
 		err = errors.New("failed to exec query : " + err.Error())
 	}
 	return err
+}
+
+func (r *articleRepository) GetArticleTags(id uuid.UUID) ([]*tag.Tag, error) {
+	var tags []*tag.Tag
+	query := `SELECT tags.id, tags.name FROM article_tags at INNER JOIN tags USING (tag_id) WHERE at.tag_id = ?`
+	rows, err := r.db.Query(query, id)
+	if err != nil {
+		return tags, fmt.Errorf("failed to retrieve article tags : %w", err)
+	}
+	for rows.Next() {
+		var tag *tag.Tag
+		err = rows.Scan(&tag.ID, &tag.Name)
+		if err != nil {
+			return tags, fmt.Errorf("failed to scan results : %w", err)
+		}
+		tags = append(tags, tag)
+	}
+	return tags, nil
+}
+
+func (r *articleRepository) AssignTagToArticle(articleID uuid.UUID, tagID uuid.UUID) error {
+	query := `INSERT INTO articles_tags (article_id, tag_id) VALUES ($1, $2)`
+	fmt.Println(query, articleID, tagID)
+	_, err := r.db.Exec(query, articleID, tagID)
+	if err != nil {
+		if strings.Contains("duplicate key value violates unique constraint", err.Error()) {
+			return ErrDuplicateKey
+		}
+		return errors.New("failed to exec query : " + err.Error())
+	}
+	return nil
 }

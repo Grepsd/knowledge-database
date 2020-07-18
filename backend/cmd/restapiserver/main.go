@@ -1,15 +1,21 @@
 package main
 
 import (
+	"github.com/grepsd/knowledge-database/pkg"
 	"github.com/grepsd/knowledge-database/pkg/http"
 	"github.com/grepsd/knowledge-database/pkg/sql"
 )
 
 func main() {
-	db := sql.NewDB("user=postgres password=tpassword database=knowledge-database sslmode=disable")
+	db := sql.NewDB("host=db user=postgres password=tpassword database=knowledge-database sslmode=disable")
 	articleRepository := sql.NewArticleRepository(&db)
+	tagRepository := sql.NewTagRepository(&db)
 	httpHelpers := http.NewHelpers()
 	articleHandler := http.NewArticleHTTPHandler(httpHelpers, articleRepository)
-	s := http.NewServer(articleHandler)
-	s.Init()
+	tagHandler := http.NewTagHTTPHandler(httpHelpers, tagRepository)
+	s := http.NewServer(articleHandler, tagHandler)
+	metrics := pkg.NewMetrics()
+	s.RegisterHandler("/metrics", metrics.GetMetrics())
+
+	s.Init(metrics)
 }
