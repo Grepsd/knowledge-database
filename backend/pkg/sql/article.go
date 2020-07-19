@@ -127,7 +127,6 @@ func (r *articleRepository) GetArticleTags(id uuid.UUID) ([]*tag.Tag, error) {
 
 func (r *articleRepository) AssignTagToArticle(articleID uuid.UUID, tagID uuid.UUID) error {
 	query := `INSERT INTO articles_tags (article_id, tag_id) VALUES ($1, $2)`
-	fmt.Println(query, articleID, tagID)
 	_, err := r.db.Exec(query, articleID, tagID)
 	if err != nil {
 		if strings.Contains("duplicate key value violates unique constraint", err.Error()) {
@@ -136,4 +135,23 @@ func (r *articleRepository) AssignTagToArticle(articleID uuid.UUID, tagID uuid.U
 		return errors.New("failed to exec query : " + err.Error())
 	}
 	return nil
+}
+
+func (r *articleRepository) GetArticleCategories(id uuid.UUID) ([]uuid.UUID, error) {
+	var articlesID []uuid.UUID
+	query := `SELECT tag_id FROM articles_tags WHERE article_id = $1`
+
+	rows, err := r.db.Query(query, id.String())
+
+	if err != nil {
+		return []uuid.UUID{}, errors.New("failed to exec GetArticleCategories query : " + err.Error())
+	}
+
+	for rows.Next() {
+		var tagID uuid.UUID
+		rows.Scan(&tagID)
+		articlesID = append(articlesID, tagID)
+	}
+
+	return articlesID, nil
 }

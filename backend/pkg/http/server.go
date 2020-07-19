@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-	"fmt"
 	"github.com/grepsd/knowledge-database/pkg"
 	"github.com/prometheus/client_golang/prometheus"
 	"log"
@@ -39,7 +38,6 @@ func requestCount(next http.HandlerFunc, counter prometheus.Counter, requestDura
 		next(w, r)
 		duration := time.Now().Sub(t)
 		microseconds := float64(duration.Microseconds()) / 1000
-		fmt.Println(float64(duration.Milliseconds()) + microseconds)
 		requestDuration.Observe(float64(duration.Milliseconds()) + microseconds)
 	}
 }

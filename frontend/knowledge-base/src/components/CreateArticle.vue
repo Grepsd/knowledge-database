@@ -81,8 +81,8 @@
                                     return
                                 }
                                 this.axios.post('/extracts', {url: url})
-                                    .then(response => this.title = response.data.Title.substr(0, 30) + '...')
-                                    .catch(error => console.log(error.response))
+                                    .then(response => this.title = response.data.title.substr(0, 30) + '...')
+                                    .catch(error => console.log(error, error.response))
                             }, 500
                         )
                         return true

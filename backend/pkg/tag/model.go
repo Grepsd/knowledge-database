@@ -3,8 +3,8 @@ package tag
 import "github.com/google/uuid"
 
 type Tag struct {
-	ID   uuid.UUID `json "id"`
-	Name string    `json "name"`
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
 }
 
 func NewTag(id uuid.UUID, name string) *Tag {
@@ -14,7 +14,8 @@ func NewTag(id uuid.UUID, name string) *Tag {
 type ReadRepositoryer interface {
 	GetOneById(id uuid.UUID) (Tag, error)
 	GetOneByName(name string) (Tag, error)
-	GetAll() ([]Tag, error)
+	GetAll(hasCategories bool) ([]Tag, error)
+	FindTagsByArticleID(id []uuid.UUID) ([]Tag, error)
 }
 type WriteRepositoryer interface {
 	Create(article Tag) error

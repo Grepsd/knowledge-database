@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -39,7 +38,6 @@ func (m *Metrics) Inc() {
 }
 
 func (m *Metrics) ServeHTTP(w http2.ResponseWriter, r *http2.Request) {
-	fmt.Println("reading metrics")
 	promhttp.Handler().ServeHTTP(w, r)
 }
 

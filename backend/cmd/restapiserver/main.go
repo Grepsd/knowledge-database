@@ -11,7 +11,7 @@ func main() {
 	articleRepository := sql.NewArticleRepository(&db)
 	tagRepository := sql.NewTagRepository(&db)
 	httpHelpers := http.NewHelpers()
-	articleHandler := http.NewArticleHTTPHandler(httpHelpers, articleRepository)
+	articleHandler := http.NewArticleHTTPHandler(httpHelpers, articleRepository, tagRepository)
 	tagHandler := http.NewTagHTTPHandler(httpHelpers, tagRepository)
 	s := http.NewServer(articleHandler, tagHandler)
 	metrics := pkg.NewMetrics()

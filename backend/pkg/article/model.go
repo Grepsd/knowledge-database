@@ -9,17 +9,18 @@ import (
 )
 
 type Article struct {
-	ID    uuid.UUID `json "id"`
-	Title string    `json "title"`
-	URL   string    `json "url"`
-	Slug  string    `json "slug"`
-	Tags  []*tag.Tag    `json "tags"`
+	ID    uuid.UUID `json:"id"`
+	Title string    `json:"title"`
+	URL   string    `json:"url"`
+	Slug  string    `json:"slug"`
+	Tags  []tag.Tag `json:"tags"`
 }
 
 type ReadRepositoryer interface {
 	GetOneById(id uuid.UUID) (Article, error)
 	GetOneBySlug(slug string) (Article, error)
 	GetAll() ([]Article, error)
+	GetArticleCategories(id uuid.UUID) ([]uuid.UUID, error)
 }
 type WriteRepositoryer interface {
 	Create(article Article) error
@@ -33,7 +34,7 @@ type ReadWriteRepositoryer interface {
 	WriteRepositoryer
 }
 
-func NewArticle(id uuid.UUID, title string, url string, slug string, tags []*tag.Tag) *Article {
+func NewArticle(id uuid.UUID, title string, url string, slug string, tags []tag.Tag) *Article {
 	return &Article{ID: id, Title: title, URL: url, Slug: slug, Tags: tags}
 }
 

@@ -24,8 +24,9 @@ func (h *helpers) respondWithJSON(w http.ResponseWriter, statusCode int, data in
 }
 
 func (h *helpers) writeErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
+	fmt.Println(err.Error())
 	w.WriteHeader(http.StatusInternalServerError)
-	fmt.Print(err)
+	w.Write([]byte(err.Error()))
 }
 
 func (h *helpers) writeResponse(w http.ResponseWriter, data string) error {

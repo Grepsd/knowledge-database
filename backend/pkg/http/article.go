@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/grepsd/knowledge-database/pkg/article"
 	"github.com/grepsd/knowledge-database/pkg/sql"
+	"github.com/grepsd/knowledge-database/pkg/tag"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -15,12 +16,13 @@ import (
 )
 
 type articleHTTPHandler struct {
-	helpers    *helpers
-	repository article.ReadWriteRepositoryer
+	helpers       *helpers
+	repository    article.ReadWriteRepositoryer
+	tagRepository tag.ReadRepositoryer
 }
 
-func NewArticleHTTPHandler(s *helpers, r article.ReadWriteRepositoryer) articleHTTPHandler {
-	return articleHTTPHandler{helpers: s, repository: r}
+func NewArticleHTTPHandler(s *helpers, r article.ReadWriteRepositoryer, tagRepository tag.ReadRepositoryer) articleHTTPHandler {
+	return articleHTTPHandler{helpers: s, repository: r, tagRepository: tagRepository}
 }
 
 func (a *articleHTTPHandler) routeCollection() http.HandlerFunc {
@@ -48,7 +50,6 @@ func (a *articleHTTPHandler) routeItem() http.HandlerFunc {
 			panic("could not compile regexp : " + err.Error())
 		}
 		matches := re.FindAllStringSubmatch(r.RequestURI, 10)
-		fmt.Printf("%#v\n", matches)
 		if len(matches[0]) == 3 {
 			if matches[0][2] == "tags" {
 				if r.Method == http.MethodPost {
@@ -117,6 +118,19 @@ func (a *articleHTTPHandler) listArticles(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		a.helpers.writeErrorResponse(w, r, fmt.Errorf("failed to list articles: %w", err))
 		return
+	}
+	for index, art := range articles {
+		articleCategoriesID, err := a.repository.GetArticleCategories(art.ID)
+		if err != nil {
+			a.helpers.writeErrorResponse(w, r, fmt.Errorf("failed to retrieve article categories relations : %w", err))
+			return
+		}
+		articleCategories, err := a.tagRepository.FindTagsByArticleID(articleCategoriesID)
+		if err != nil {
+			a.helpers.writeErrorResponse(w, r, fmt.Errorf("failed to retrieve article related tags : %w", err))
+			return
+		}
+		articles[index].Tags = articleCategories
 	}
 	a.helpers.respondWithJSON(w, http.StatusOK, articles)
 }
@@ -233,7 +247,7 @@ func (a *articleHTTPHandler) extractsRoutes(w http.ResponseWriter, r *http.Reque
 		}
 		defer r.Body.Close()
 		var url struct {
-			URL string `json "url"`
+			URL string `json:"url"`
 		}
 		err = json.Unmarshal(body, &url)
 		if err != nil {
@@ -255,8 +269,8 @@ func (a *articleHTTPHandler) extractsRoutes(w http.ResponseWriter, r *http.Reque
 		}
 
 		output := struct {
-			URL   string `json "url"`
-			Title string `json "title"`
+			URL   string `json:"url"`
+			Title string `json:"title"`
 		}{url.URL, title}
 		err = a.helpers.respondWithJSON(w, http.StatusOK, output)
 		if err != nil {
@@ -274,7 +288,7 @@ func (a *articleHTTPHandler) assignTagToArticle(w http.ResponseWriter, r *http.R
 		return
 	}
 	type tt struct {
-		ID string `json "ID"`
+		ID string `json:"ID"`
 	}
 	var t tt
 	err = json.Unmarshal(payload, &t)

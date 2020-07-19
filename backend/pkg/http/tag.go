@@ -67,7 +67,16 @@ func (h *tagHTTPHandler) createTag(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *tagHTTPHandler) getAllTags(w http.ResponseWriter, r *http.Request) {
-	tags, err := h.repository.GetAll()
+	parameters := r.URL.Query()
+	hasCategoriesParameter := parameters.Get("has_articles")
+	var hasCategoriesFilter bool
+	if hasCategoriesParameter != "" {
+		if hasCategoriesParameter == "true" {
+			hasCategoriesFilter = true
+		}
+	}
+
+	tags, err := h.repository.GetAll(hasCategoriesFilter)
 	if err != nil {
 		h.helpers.writeErrorResponse(w, r, fmt.Errorf("failed to load tags : %w", err))
 		return
