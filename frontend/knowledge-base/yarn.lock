@@ -1987,7 +1987,7 @@ cache-loader@^4.1.0:
   resolved "https://registry.yarnpkg.com/cache-loader/-/cache-loader-4.1.0.tgz#9948cae353aec0a1fcb1eafda2300816ec85387e"
   integrity sha512-ftOayxve0PwKzBF/GLsZNC9fJBXl8lkZE3TOsjkboHfVHVkL39iUEs1FO07A33mizmci5Dudt38UZrrYXDtbhw==
   dependencies:
-    buffer-json:"^2.0.0"
+    buffer-json "^2.0.0"
     find-cache-dir "^3.0.0"
     loader-utils "^1.2.3"
     mkdirp "^0.5.1"
@@ -2506,7 +2506,7 @@ cosmiconfig@^5.0.0:
     import-fresh "^2.0.0"
     is-directory "^0.3.1"
     js-yaml "^3.13.1"
-    parse-json:"^4.0.0"
+    parse-json "^4.0.0"
 
 create-ecdh@^4.0.0:
   version "4.0.3"
@@ -6281,9 +6281,9 @@ postcss-value-parser@^4.0.0, postcss-value-parser@^4.0.2, postcss-value-parser@^
   integrity sha512-97DXOFbQJhk71ne5/Mt6cOu6yxsSfM0QGQyl0L25Gca4yGWEGJaig7l7gbCX623VqTBNGLRLaVUCnNkcedlRSQ==
 
 postcss@^7.0.0, postcss@^7.0.1, postcss@^7.0.14, postcss@^7.0.16, postcss@^7.0.27, postcss@^7.0.32, postcss@^7.0.5, postcss@^7.0.6:
-  version "7.0.32"
-  resolved "https://registry.yarnpkg.com/postcss/-/postcss-7.0.32.tgz#4310d6ee347053da3433db2be492883d62cec59d"
-  integrity sha512-03eXong5NLnNCD05xscnGKGDZ98CyzoqPSMjOe6SuoQY7Z2hIj0Ld1g/O/UQRuOle2aRtiIRDg9tDcTGAkLfKw==
+  version "7.0.36"
+  resolved "https://registry.yarnpkg.com/postcss/-/postcss-7.0.36.tgz#056f8cffa939662a8f5905950c07d5285644dfcb"
+  integrity sha512-BebJSIUMwJHRH0HAQoxN4u1CN86glsrwsW0q7T+/m44eXOUAxSNdHRkNZPYz5vVUbg17hFgOQDE7fZk7li3pZw==
   dependencies:
     chalk "^2.4.2"
     source-map "^0.6.1"
@@ -6482,7 +6482,7 @@ read-pkg@^5.1.1:
   dependencies:
     "@types/normalize-package-data" "^2.4.0"
     normalize-package-data "^2.5.0"
-    parse-json:"^5.0.0"
+    parse-json "^5.0.0"
     type-fest "^0.6.0"
 
 "readable-stream@1 || 2", readable-stream@^2.0.0, readable-stream@^2.0.1, readable-stream@^2.0.2, readable-stream@^2.1.5, readable-stream@^2.2.2, readable-stream@^2.3.3, readable-stream@^2.3.6, readable-stream@~2.3.6:
